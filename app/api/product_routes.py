@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from ..core.database import get_db
-from ..schemas.product_schemas import ProductCreate, ProductUpdate, ProductResponse
+from ..schemas.product_schemas import ProductCreate, ProductUpdate, ProductResponse, ProductCreateForm, ProductUpdateForm
 from ..services.product_service import ProductService
 from ..repositories.product_repository import ProductRepository
 
@@ -52,11 +52,11 @@ def get_product(
 
 @router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
 def create_product(
-    product_data: ProductCreate,
+    form_data: ProductCreateForm = Depends(),
     service: ProductService = Depends(get_product_service),
     current_user: dict = Depends(require_admin)
 ):
-    product = service.create_product(product_data)
+    product = service.create_product_with_image(form_data)
     return {
         "success": True,
         "message": "Product created successfully",
@@ -66,11 +66,11 @@ def create_product(
 @router.put("/{product_id}", response_model=dict)
 def update_product(
     product_id: int,
-    product_data: ProductUpdate,
+    form_data: ProductUpdateForm = Depends(),
     service: ProductService = Depends(get_product_service),
     current_user: dict = Depends(require_admin)
 ):
-    product = service.update_product(product_id, product_data)
+    product = service.update_product_with_image(product_id, form_data)
     return {
         "success": True,
         "message": "Product updated successfully",
