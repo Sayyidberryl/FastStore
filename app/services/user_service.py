@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException
 from ..core.database import get_db
 from ..schemas.user_schemas import UserCreate, UserUpdate
-from ..models.user import User
+from ..models.user import Users
 
 class UserService():
     def __init__(self, repository: UserRepository):
@@ -24,16 +24,16 @@ class UserService():
                 status_code=404,
                 detail="User not found"
             )
+    def get_users_by_username(self, username:str):
+        user = self.repository.get_by_username(username)
+        if user:
+            return user
+        else: 
+            raise HTTPException(
+                status_code=404,
+                detail="User not found"
+            )
             
-    def add_users(self, data: UserCreate):
-        new_user = User(
-            username = data.username,
-            password = data.password,
-            name = data.name,
-            email = data.email
-        )
-        return self.repository.add_user(new_user)
-    
     def update_users(self, id:int, data:UserUpdate):
         user = self.repository.get_by_id(id)
         if user:
